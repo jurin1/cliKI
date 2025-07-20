@@ -16,9 +16,11 @@ Chat-CLI ist ein einfaches, aber mächtiges Werkzeug, das Ihnen hilft, direkt in
 ```bash
 curl -sSL https://raw.githubusercontent.com/jurin1/cliKi/main/install.sh | bash
 
+
 ## Erster Ausführung
 
 Öffnen Sie Ihr Terminal und führen Sie den folgenden Befehl aus:
 
-```bash
+bash
 chat suche nach allen Dateien die größer als 10mb groß sind | bash
+```
