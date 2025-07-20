@@ -6,7 +6,7 @@ YELLOW="\033[1;33m"
 BLUE="\033[0;34m"
 NC="\033[0m" # No Color
 
-# Repo-Informationen (passen Sie dies an, wenn Ihr GitHub-Repo anders heißt)
+# Repo-Informationen
 GITHUB_REPO="jurin1/cliKi"
 BACKEND_SCRIPT_URL="https://raw.githubusercontent.com/${GITHUB_REPO}/main/scripts/chat-backend.sh"
 BACKEND_DEST="/usr/local/bin/chat-backend"
@@ -45,21 +45,16 @@ fi
 
 read -p "Soll die Konfiguration in '$SHELL_CONFIG' geschrieben werden? (J/n) " choice
 
-# --- KORRIGIERTER BLOCK ---
-# Die case-Anweisung ist jetzt mehrzeilig und robuster.
 case "$choice" in
   n|N)
     read -p "Bitte geben Sie den Pfad zu Ihrer Shell-Konfigurationsdatei an: " SHELL_CONFIG
     ;;
   *)
-    # Bei 'J' oder einfach Enter wird der Standardwert beibehalten.
     ;;
 esac
-# --- ENDE KORRIGIERTER BLOCK ---
-
 
 if [ ! -f "$SHELL_CONFIG" ]; then
-    echo "Die angegebene Datei existiert nicht. Abbruch."
+    echo "Die angegebene Datei '$SHELL_CONFIG' existiert nicht. Abbruch."
     exit 1
 fi
 
@@ -69,7 +64,8 @@ if grep -q "export GEMINI_API_KEY" "$SHELL_CONFIG"; then
     echo -e "${GREEN}API-Schlüssel ist bereits in '$SHELL_CONFIG' vorhanden. Wird übersprungen.${NC}"
 else
     read -p "Bitte geben Sie Ihren Google Gemini API-Schlüssel ein: " api_key
-    echo -e "\n# Für das Chat-CLI-Tool hinzugefügt" >> "$SHELL_CONFIG"
+    echo "" >> "$SHELL_CONFIG"
+    echo "# Für das Chat-CLI-Tool hinzugefügt" >> "$SHELL_CONFIG"
     echo "export GEMINI_API_KEY=\"$api_key\"" >> "$SHELL_CONFIG"
     echo -e "${GREEN}API-Schlüssel wurde zu '$SHELL_CONFIG' hinzugefügt.${NC}"
 fi
@@ -79,7 +75,6 @@ echo -e "\n${YELLOW}Schritt 3: Füge die 'chat' Funktion zur Shell hinzu...${NC}
 if grep -q "function chat()" "$SHELL_CONFIG"; then
     echo -e "${GREEN}'chat'-Funktion ist bereits vorhanden. Wird übersprungen.${NC}"
 else
-    # HEREDOC mit 'EOF' in Anführungszeichen, um Variablenexpansion zu verhindern
     cat <<'EOF' >> "$SHELL_CONFIG"
 
 # Funktion für das KI-gestützte Chat-CLI-Tool
@@ -100,12 +95,12 @@ fi
 
 # Schritt 5: Backend-Skript herunterladen
 echo -e "\n${YELLOW}Schritt 4: Installiere das Backend-Skript...${NC}"
+DL_SKIP="false"
 if [ -f "$BACKEND_DEST" ]; then
     read -p "Das Backend-Skript existiert bereits. Erneut herunterladen und überschreiben? (j/N) " choice
-    DL_SKIP="false"
     case "$choice" in
-      j|J ) ;;
-      * ) echo "Download wird übersprungen."; DL_SKIP="true";;
+      j|J) ;;
+      *) echo "Download wird übersprungen."; DL_SKIP="true";;
     esac
 fi
 
@@ -118,18 +113,18 @@ fi
 
 # Schritt 6: Modell auswählen
 echo -e "\n${YELLOW}Schritt 5: Wähle das Standard-KI-Modell aus...${NC}"
-PS3="Bitte wählen Sie das zu aktivierende Modell: "
+# --- KORRIGIERTE ZEILE ---
+# Eine viel klarere Anweisung für den Benutzer.
+PS3="Geben Sie die Zahl für das gewünschte Modell ein (z.B. 1): "
 select opt in "${MODELS[@]}"; do
     if [[ -n $opt ]]; then
         echo "Aktiviere $opt..."
-        # Zuerst alle Modellzeilen auskommentieren
         sudo sed -i 's/^\(MODEL_NAME=.*\)/#\1/' "$BACKEND_DEST"
-        # Dann die ausgewählte Zeile wieder aktivieren (das # entfernen)
         sudo sed -i "s/^#\(MODEL_NAME=\"$opt\"\)/\1/" "$BACKEND_DEST"
         echo -e "${GREEN}$opt wurde als Standardmodell festgelegt.${NC}"
         break
     else
-        echo "Ungültige Auswahl."
+        echo "Ungültige Auswahl. Bitte geben Sie nur eine Zahl aus der Liste ein."
     fi
 done
 
