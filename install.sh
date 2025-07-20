@@ -50,35 +50,29 @@ if [ -f "$HOME/.zshrc" ]; then
 
 # Funktion für das KI-gestützte Chat-CLI-Tool (ZSH-Version)
 function chat() {
-  # 1. Hole alle Befehle vom Backend
+  # 1. Hole alle Befehle vom Backend. Der ausgewählte ist am Ende.
   local all_commands
   all_commands=$(chat-backend "$@" < /dev/tty)
 
   # 2. Prüfe, ob überhaupt etwas zurückkam
   if [ -n "$all_commands" ]; then
-    # 3. Teile den String bei Zeilenumbrüchen in ein Array auf
-    local -a commands_array=("${(@f)all_commands}")
+    # 3. Hole den ausgewählten Befehl (die letzte Zeile)
+    local selected_command
+    selected_command=$(echo "$all_commands" | tail -n 1)
+
+    # 4. Hole alle ANDEREN Befehle (alle Zeilen außer der letzten)
+    local history_commands
+    history_commands=$(echo "$all_commands" | head -n -1)
     
-    # 4. Ermittle die Gesamtzahl der Befehle
-    local num_commands=${#commands_array[@]}
-
-    # Wenn es keine Befehle gibt, tue nichts
-    if [ $num_commands -eq 0 ]; then
-      return
-    fi
-
-    # 5. Der ausgewählte Befehl ist der letzte im Array
-    local selected_command="${commands_array[$num_commands]}"
-
-    # 6. Füge alle ANDEREN Befehle (von 1 bis zum vorletzten) zur History hinzu.
-    #    Diese Schleife ist explizit und funktioniert immer.
-    if [ $num_commands -gt 1 ]; then
-      for i in {1..$((num_commands - 1))}; do
-        print -s "${commands_array[$i]}"
-      done
+    # 5. Füge die "anderen" Befehle mit einer robusten `while`-Schleife zur History hinzu.
+    #    Genau wie in der funktionierenden Bash-Version.
+    if [ -n "$history_commands" ]; then
+      while IFS= read -r line; do
+        print -s "$line"
+      done <<< "$history_commands"
     fi
     
-    # 7. Füge den ausgewählten Befehl in den Prompt ein
+    # 6. Füge den ausgewählten Befehl in den Prompt ein.
     print -z "$selected_command"
   fi
 }
