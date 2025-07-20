@@ -14,7 +14,7 @@ Chat-CLI ist ein einfaches, aber mächtiges Werkzeug, das Ihnen hilft, direkt in
 Öffnen Sie Ihr Terminal und führen Sie den folgenden Befehl aus:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/jurin1/cliKi/main/install.sh
+curl -sSL https://raw.githubusercontent.com/jurin1/cliKi/main/install.sh | bash
 ```
 
 ## Erster Ausführung
