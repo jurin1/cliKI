@@ -12,7 +12,7 @@ BACKEND_SCRIPT_URL="https://raw.githubusercontent.com/${GITHUB_REPO}/main/script
 BACKEND_DEST="/usr/local/bin/chat-backend"
 
 # verfügbare Modelle
-MODELS=("gemini-1.5-flash" "gemini-1.5-pro")
+MODELS=("gemini-2.5-flash" "gemini-2.5-pro")
 
 echo -e "${BLUE}--- Willkommen beim Installer für das Chat-CLI-Tool ---${NC}"
 
