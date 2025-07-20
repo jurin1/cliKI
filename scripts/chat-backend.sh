@@ -16,7 +16,7 @@ if [ -z "$GEMINI_API_KEY" ]; then exit 1; fi
 if [ "$#" -eq 0 ]; then exit 1; fi
 
 # ... (API-Aufruf bleibt gleich)
-USER_QUERY="$*"; AI_PROMPT="Du bist ein Experte für Linux/Unix Shell-Befehle. Deine Aufgabe ist es, basierend auf der Anfrage des Benutzers eine Liste von nützlichen Shell-Befehlen vorzuschlagen. Deine Antwort MUSS AUSSCHLIESSLICH ein gültiges JSON-Objekt sein. Das JSON-Objekt muss die folgende Struktur haben: {\"introduction\": \"Ein kurzer, hilfreicher Einleitungstext.\",\"commands\": [{\"command\": \"der erste befehl\",\"description\": \"Eine kurze Erklärung, was dieser Befehl tut.\"}]}. Hier ist die Anfrage des Benutzers: $USER_QUERY"
+USER_QUERY="$*"; AI_PROMPT="Du bist ein Experte für Linux/Unix Shell-Befehle. Deine Aufgabe ist es, basierend auf der Anfrage des Benutzers eine Liste von nützlichen Shell-Befehlen vorzuschlagen. Deine Antwort MUSS AUSSCHLIESSLICH ein gültiges JSON-Objekt sein. Das JSON-Objekt muss die folgende Struktur haben: {\"introduction\": \"Ein kurzer, hilfreicher Einleitungstext.\",\"commands\": [{\"command\": \"der erste befehl\",\"description\": \"Eine kurze Erklärung, was dieser Befehl tut in stichpunkten reicht aus.\"}]}. Hier ist die Anfrage des Benutzers: $USER_QUERY"
 spinner_start; API_RESPONSE=$(curl -s "https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent" -H 'Content-Type: application/json' -H "X-goog-api-key: $GEMINI_API_KEY" -d "$(jq -n --arg prompt "$AI_PROMPT" '{ "contents": [{"parts":[{"text": $prompt}]}]}')"); spinner_stop
 RAW_TEXT=$(echo "$API_RESPONSE" | jq -r '.candidates[0].content.parts[0].text' 2>/dev/null); CLEAN_JSON=$(echo "$RAW_TEXT" | sed 's/^```json//; s/```$//'); if ! echo "$CLEAN_JSON" | jq -e '.commands' > /dev/null; then exit 1; fi
 

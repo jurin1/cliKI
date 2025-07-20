@@ -50,20 +50,36 @@ if [ -f "$HOME/.zshrc" ]; then
 
 # Funktion für das KI-gestützte Chat-CLI-Tool (ZSH-Version)
 function chat() {
-  # Hole die Befehle vom Backend
-  local all_commands; all_commands=$(chat-backend "$@" < /dev/tty)
+  # 1. Hole alle Befehle vom Backend
+  local all_commands
+  all_commands=$(chat-backend "$@" < /dev/tty)
 
-  # Prüfe, ob Befehle zurückkamen
+  # 2. Prüfe, ob überhaupt etwas zurückkam
   if [ -n "$all_commands" ]; then
-    # Die "Zsh-Art": Teile den String bei jedem Zeilenumbruch in ein Array auf.
+    # 3. Teile den String bei Zeilenumbrüchen in ein Array auf
     local -a commands_array=("${(@f)all_commands}")
-
-    # Füge jeden Befehl aus dem Array einzeln zur History hinzu.
-    for cmd in "${commands_array[@]}"; do
-      print -s "$cmd"
-    done
     
-    echo -e "\n\033[1;32mBefehle zur History hinzugefügt. Drücken Sie [Pfeil nach oben].\033[0m"
+    # 4. Ermittle die Gesamtzahl der Befehle
+    local num_commands=${#commands_array[@]}
+
+    # Wenn es keine Befehle gibt, tue nichts
+    if [ $num_commands -eq 0 ]; then
+      return
+    fi
+
+    # 5. Der ausgewählte Befehl ist der letzte im Array
+    local selected_command="${commands_array[$num_commands]}"
+
+    # 6. Füge alle ANDEREN Befehle (von 1 bis zum vorletzten) zur History hinzu.
+    #    Diese Schleife ist explizit und funktioniert immer.
+    if [ $num_commands -gt 1 ]; then
+      for i in {1..$((num_commands - 1))}; do
+        print -s "${commands_array[$i]}"
+      done
+    fi
+    
+    # 7. Füge den ausgewählten Befehl in den Prompt ein
+    print -z "$selected_command"
   fi
 }
 EOF
