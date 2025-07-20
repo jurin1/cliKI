@@ -1,27 +1,21 @@
 #!/bin/bash
 
-# -- chat-backend.sh --
-# Wird vom Installer nach /usr/local/bin/chat-backend kopiert.
+# -- chat-backend.sh (Finale Version) --
 
-# --- Modell-Konfiguration ---
-# Der Installer wird eines dieser Modelle aktivieren (das # entfernen)
-# und die anderen auskommentieren.
+# --- Modell-Konfiguration (JETZT KORREKT) ---
+# Der Installer wird eines dieser Modelle aktivieren.
 MODEL_NAME="gemini-2.5-flash"
 #MODEL_NAME="gemini-2.5-pro"
-# Sie können hier zukünftige Modelle hinzufügen, z.B.:
-#MODEL_NAME="gemini-2.0-ultra"
 
-# --- Ladeanimation Konfiguration ---
-SPINNER_CHARS="⠁⠂⠄⡀⢀⠠⠐⠈"
+# --- Ladeanimation (JETZT ROBUSTER) ---
+SPINNER_CHARS="-\|/" # Klassische, universelle ASCII-Animation
 SPINNER_TEXT="\033[1;36mKI denkt nach... \033[0m"
 
-# --- Funktionen (spinner_start, spinner_stop) ---
-# ... (Hier kommt der unveränderte Code der Spinner-Funktionen aus Version 8) ...
+# --- Funktionen ---
 spinner_start() { ( i=0; while true; do printf "\r${SPINNER_TEXT}%s " "${SPINNER_CHARS:i++%${#SPINNER_CHARS}:1}" >&2; sleep 0.1; done ) & SPINNER_PID=$!; trap "spinner_stop; exit" INT TERM; }
 spinner_stop() { kill "$SPINNER_PID" &>/dev/null; printf "\r%*s\r" "$(tput cols)" "" >&2; }
 
-# --- Skript-Logik ---
-# ... (Hier kommt der unveränderte Code der Hauptlogik aus Version 8) ...
+# --- Hauptlogik (unverändert) ---
 if [ -z "$GEMINI_API_KEY" ]; then echo "Fehler: GEMINI_API_KEY ist nicht gesetzt." >&2; exit 1; fi
 if [ "$#" -eq 0 ]; then echo "Benutzung: chat <Ihre Frage an die KI>" >&2; exit 1; fi
 USER_QUERY="$*"; AI_PROMPT="Du bist ein Experte für Linux/Unix Shell-Befehle. Deine Aufgabe ist es, basierend auf der Anfrage des Benutzers eine Liste von nützlichen Shell-Befehlen vorzuschlagen. Deine Antwort MUSS AUSSCHLIESSLICH ein gültiges JSON-Objekt sein. Gib keinen Text, keine Erklärungen und keine Markdown-Formatierung wie \\\`\\\`\\\`json ausserhalb des JSON-Objekts aus. Das JSON-Objekt muss die folgende Struktur haben: {\"introduction\": \"Ein kurzer, hilfreicher Einleitungstext.\",\"commands\": [{\"command\": \"der erste befehl\",\"description\": \"Eine kurze Erklärung, was dieser Befehl tut.\"}]}. Hier ist die Anfrage des Benutzers: $USER_QUERY"
