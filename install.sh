@@ -12,7 +12,7 @@ BACKEND_SCRIPT_URL="https://raw.githubusercontent.com/${GITHUB_REPO}/main/script
 BACKEND_DEST="/usr/local/bin/chat-backend"
 
 # verfügbare Modelle
-MODELS=("gemini-2.5-flash" "gemini-2.5-pro")
+MODELS=("gemini-1.5-flash" "gemini-1.5-pro")
 
 echo -e "${BLUE}--- Willkommen beim Installer für das Chat-CLI-Tool ---${NC}"
 
@@ -43,14 +43,13 @@ elif [ -f "$HOME/.bashrc" ]; then
     echo -e "\n${YELLOW}Bash-Konfiguration (~/.bashrc) gefunden.${NC}"
 fi
 
-read -p "Soll die Konfiguration in '$SHELL_CONFIG' geschrieben werden? (J/n) " choice
-
+# KORREKTUR: < /dev/tty hinzugefügt, um vom Terminal zu lesen
+read -p "Soll die Konfiguration in '$SHELL_CONFIG' geschrieben werden? (J/n) " choice < /dev/tty
 case "$choice" in
   n|N)
-    read -p "Bitte geben Sie den Pfad zu Ihrer Shell-Konfigurationsdatei an: " SHELL_CONFIG
+    read -p "Bitte geben Sie den Pfad zu Ihrer Shell-Konfigurationsdatei an: " SHELL_CONFIG < /dev/tty
     ;;
-  *)
-    ;;
+  *) ;;
 esac
 
 if [ ! -f "$SHELL_CONFIG" ]; then
@@ -63,7 +62,15 @@ echo -e "\n${YELLOW}Schritt 2: Konfiguriere Gemini API-Schlüssel...${NC}"
 if grep -q "export GEMINI_API_KEY" "$SHELL_CONFIG"; then
     echo -e "${GREEN}API-Schlüssel ist bereits in '$SHELL_CONFIG' vorhanden. Wird übersprungen.${NC}"
 else
-    read -p "Bitte geben Sie Ihren Google Gemini API-Schlüssel ein: " api_key
+    # KORREKTUR: Schleife, um eine leere Eingabe zu verhindern
+    while true; do
+        read -p "Bitte geben Sie Ihren Google Gemini API-Schlüssel ein: " api_key < /dev/tty
+        if [ -n "$api_key" ]; then
+            break
+        else
+            echo "Die Eingabe darf nicht leer sein. Bitte versuchen Sie es erneut."
+        fi
+    done
     echo "" >> "$SHELL_CONFIG"
     echo "# Für das Chat-CLI-Tool hinzugefügt" >> "$SHELL_CONFIG"
     echo "export GEMINI_API_KEY=\"$api_key\"" >> "$SHELL_CONFIG"
@@ -97,7 +104,8 @@ fi
 echo -e "\n${YELLOW}Schritt 4: Installiere das Backend-Skript...${NC}"
 DL_SKIP="false"
 if [ -f "$BACKEND_DEST" ]; then
-    read -p "Das Backend-Skript existiert bereits. Erneut herunterladen und überschreiben? (j/N) " choice
+    # KORREKTUR: < /dev/tty hinzugefügt
+    read -p "Das Backend-Skript existiert bereits. Erneut herunterladen und überschreiben? (j/N) " choice < /dev/tty
     case "$choice" in
       j|J) ;;
       *) echo "Download wird übersprungen."; DL_SKIP="true";;
@@ -113,9 +121,9 @@ fi
 
 # Schritt 6: Modell auswählen
 echo -e "\n${YELLOW}Schritt 5: Wähle das Standard-KI-Modell aus...${NC}"
-# --- KORRIGIERTE ZEILE ---
-# Eine viel klarere Anweisung für den Benutzer.
 PS3="Geben Sie die Zahl für das gewünschte Modell ein (z.B. 1): "
+# KORREKTUR: Die gesamte Schleife liest jetzt vom Terminal
+{
 select opt in "${MODELS[@]}"; do
     if [[ -n $opt ]]; then
         echo "Aktiviere $opt..."
@@ -127,6 +135,7 @@ select opt in "${MODELS[@]}"; do
         echo "Ungültige Auswahl. Bitte geben Sie nur eine Zahl aus der Liste ein."
     fi
 done
+} < /dev/tty
 
 echo -e "\n${GREEN}--- Installation abgeschlossen! ---${NC}"
 echo -e "Bitte starten Sie Ihr Terminal neu oder führen Sie \`${YELLOW}source $SHELL_CONFIG\` aus, um die Änderungen zu laden."
