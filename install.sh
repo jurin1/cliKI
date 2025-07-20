@@ -7,7 +7,7 @@ BLUE="\033[0;34m"
 NC="\033[0m" # No Color
 
 # Repo-Informationen (passen Sie dies an, wenn Ihr GitHub-Repo anders heißt)
-GITHUB_REPO="jurin1/cli-ki"
+GITHUB_REPO="jurin1/cliKi"
 BACKEND_SCRIPT_URL="https://raw.githubusercontent.com/${GITHUB_REPO}/main/scripts/chat-backend.sh"
 BACKEND_DEST="/usr/local/bin/chat-backend"
 
