@@ -12,7 +12,7 @@ BACKEND_SCRIPT_URL="https://raw.githubusercontent.com/${GITHUB_REPO}/main/script
 BACKEND_DEST="/usr/local/bin/chat-backend"
 
 # verfügbare Modelle
-MODELS=("gemini-2.5-flash" "gemini-2.5-pro")
+MODELS=("gemini-1.5-flash" "gemini-1.5-pro")
 
 echo -e "${BLUE}--- Willkommen beim Installer für das Chat-CLI-Tool ---${NC}"
 
@@ -44,10 +44,19 @@ elif [ -f "$HOME/.bashrc" ]; then
 fi
 
 read -p "Soll die Konfiguration in '$SHELL_CONFIG' geschrieben werden? (J/n) " choice
+
+# --- KORRIGIERTER BLOCK ---
+# Die case-Anweisung ist jetzt mehrzeilig und robuster.
 case "$choice" in
-  n|N ) read -p "Bitte geben Sie den Pfad zu Ihrer Shell-Konfigurationsdatei an: " SHELL_CONFIG;;
-  * ) ;;
+  n|N)
+    read -p "Bitte geben Sie den Pfad zu Ihrer Shell-Konfigurationsdatei an: " SHELL_CONFIG
+    ;;
+  *)
+    # Bei 'J' oder einfach Enter wird der Standardwert beibehalten.
+    ;;
 esac
+# --- ENDE KORRIGIERTER BLOCK ---
+
 
 if [ ! -f "$SHELL_CONFIG" ]; then
     echo "Die angegebene Datei existiert nicht. Abbruch."
@@ -93,6 +102,7 @@ fi
 echo -e "\n${YELLOW}Schritt 4: Installiere das Backend-Skript...${NC}"
 if [ -f "$BACKEND_DEST" ]; then
     read -p "Das Backend-Skript existiert bereits. Erneut herunterladen und überschreiben? (j/N) " choice
+    DL_SKIP="false"
     case "$choice" in
       j|J ) ;;
       * ) echo "Download wird übersprungen."; DL_SKIP="true";;
