@@ -36,10 +36,11 @@ function chat() {
     while IFS= read -r line; do
       history -s "$line"
     done <<< "$all_commands"
-    
+
     echo -e "\033[1;32m$selected_command\033[0m"
 
     echo -e "\n\033[1;32mBefehle zur History hinzugefügt. Drücken Sie [Pfeil nach oben].\033[0m"
+
   fi
 }
 EOF
@@ -61,6 +62,7 @@ function chat() {
     done <<< "$all_commands"
     
     echo -e "\n\033[1;32mBefehle zur History hinzugefügt. Drücken Sie [Pfeil nach oben].\033[0m"
+
   fi
 }
 EOF
@@ -82,7 +84,7 @@ PS3="Geben Sie die Zahl für das Modell ein (z.B. 1): "
 { select opt in "${MODELS[@]}"; do if [[ -n $opt ]]; then sudo sed -i 's/^MODEL_NAME=/#MODEL_NAME=/' "$BACKEND_DEST"; sudo sed -i "s/^#MODEL_NAME=\"$opt\"/MODEL_NAME=\"$opt\"/" "$BACKEND_DEST"; echo -e "${GREEN}$opt als Standard festgelegt.${NC}"; break; else echo "Ungültige Auswahl."; fi; done; } < /dev/tty
 
 # Finale Ausgabe (JETZT MIT FARBKORREKTUR)
-echo -e "\n${GREEN}--- Installation abgeschlossen! ---${NC}"
 echo -e "Bitte starten Sie Ihr Terminal neu oder führen Sie den folgenden Befehl aus:"
 # Korrigierte Zeile mit NC am Ende
 echo -e "\`${YELLOW}source ~/.bashrc\`${NC} (oder \`${YELLOW}source ~/.zshrc\`${NC})"
+echo -e "\n${GREEN}--- Installation abgeschlossen! ---${NC}"
